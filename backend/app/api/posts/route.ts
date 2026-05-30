@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import connectDB from "@/lib/db";
 import Post from "@/models/Post";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,21 +30,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const user = getAuthUser(request);
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const { title, description, githubLink, demoLink, screenshots, tags, authorId } = body;
+    const body = await request.json();
+    const { title, description, githubLink, demoLink, screenshots, tags } = body;
 
     if (!title?.trim() || !description?.trim()) {
       return Response.json(
         { error: "Title and description are required" },
         { status: 400 }
-      );
-    }
-
-    if (!authorId) {
-      return Response.json(
-        { error: "Unauthorized" },
-        { status: 401 }
       );
     }
 
@@ -56,15 +54,12 @@ export async function POST(request: NextRequest) {
       demoLink: demoLink?.trim() || undefined,
       screenshots: screenshots ?? [],
       tags: tags ?? [],
-      authorId,
+      authorId: user.login,
     });
 
     return Response.json(post, { status: 201 });
   } catch (error) {
     console.error("[POST /api/posts]", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

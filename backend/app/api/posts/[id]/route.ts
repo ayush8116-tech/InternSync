@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import connectDB from "@/lib/db";
 import Post from "@/models/Post";
+import { getAuthUser } from "@/lib/auth";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -44,10 +45,15 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = getAuthUser(request);
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
 
     if (!mongoose.isValidObjectId(id)) {
@@ -60,6 +66,10 @@ export async function DELETE(
 
     if (!post) {
       return Response.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (post.authorId !== user.login) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Best-effort Cloudinary cleanup — DB deletion proceeds regardless
@@ -88,10 +98,27 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = getAuthUser(request);
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
 
     if (!mongoose.isValidObjectId(id)) {
       return Response.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    await connectDB();
+
+    const existing = await Post.findById(id).lean();
+
+    if (!existing) {
+      return Response.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (existing.authorId !== user.login) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
@@ -103,8 +130,6 @@ export async function PATCH(
         { status: 400 }
       );
     }
-
-    await connectDB();
 
     const post = await Post.findByIdAndUpdate(
       id,
@@ -118,10 +143,6 @@ export async function PATCH(
       },
       { new: true, runValidators: true }
     ).lean();
-
-    if (!post) {
-      return Response.json({ error: "Post not found" }, { status: 404 });
-    }
 
     return Response.json(post, { status: 200 });
   } catch (error) {

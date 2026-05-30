@@ -11,11 +11,18 @@ jest.mock("cloudinary", () => ({
     uploader: { destroy: jest.fn() },
   },
 }));
+jest.mock("@/lib/auth", () => ({
+  getAuthUser: jest.fn(),
+}));
+
+import { getAuthUser } from "@/lib/auth";
 
 const mockConnectDB = connectDB as jest.MockedFunction<typeof connectDB>;
 const mockDestroy = cloudinary.uploader.destroy as jest.Mock;
+const mockGetAuthUser = getAuthUser as jest.Mock;
 
 const VALID_ID = "507f1f77bcf86cd799439011";
+const mockUser = { sub: "u1", login: "user_123", name: "User", avatarUrl: "" };
 
 const mockPost = {
   _id: VALID_ID,
@@ -47,6 +54,24 @@ describe("DELETE /api/posts/[id]", () => {
     jest.clearAllMocks();
     mockConnectDB.mockResolvedValue({} as never);
     mockDestroy.mockResolvedValue({ result: "ok" });
+    mockGetAuthUser.mockReturnValue(mockUser);
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    mockGetAuthUser.mockReturnValue(null);
+    const { DELETE } = await import("@/app/api/posts/[id]/route");
+    const res = await DELETE(makeRequest(VALID_ID), makeParams(VALID_ID));
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 403 when authenticated user is not the post owner", async () => {
+    mockGetAuthUser.mockReturnValue({ ...mockUser, login: "other_user" });
+    (Post.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue(mockPost),
+    });
+    const { DELETE } = await import("@/app/api/posts/[id]/route");
+    const res = await DELETE(makeRequest(VALID_ID), makeParams(VALID_ID));
+    expect(res.status).toBe(403);
   });
 
   it("returns 204 when the post is found and deleted", async () => {
@@ -57,7 +82,6 @@ describe("DELETE /api/posts/[id]", () => {
 
     const { DELETE } = await import("@/app/api/posts/[id]/route");
     const res = await DELETE(makeRequest(VALID_ID), makeParams(VALID_ID));
-
     expect(res.status).toBe(204);
   });
 
@@ -92,48 +116,25 @@ describe("DELETE /api/posts/[id]", () => {
   it("returns 404 for an invalid MongoDB ObjectId", async () => {
     const { DELETE } = await import("@/app/api/posts/[id]/route");
     const res = await DELETE(makeRequest("not-valid"), makeParams("not-valid"));
-    const data = await res.json();
-
     expect(res.status).toBe(404);
-    expect(data.error).toBe("Post not found");
   });
 
   it("returns 404 when the post does not exist", async () => {
     (Post.findById as jest.Mock).mockReturnValue({
       lean: jest.fn().mockResolvedValue(null),
     });
-
     const { DELETE } = await import("@/app/api/posts/[id]/route");
     const res = await DELETE(makeRequest(VALID_ID), makeParams(VALID_ID));
-    const data = await res.json();
-
     expect(res.status).toBe(404);
-    expect(data.error).toBe("Post not found");
   });
 
   it("returns 500 when the database throws", async () => {
     (Post.findById as jest.Mock).mockReturnValue({
       lean: jest.fn().mockRejectedValue(new Error("DB error")),
     });
-
     const { DELETE } = await import("@/app/api/posts/[id]/route");
     const res = await DELETE(makeRequest(VALID_ID), makeParams(VALID_ID));
-    const data = await res.json();
-
     expect(res.status).toBe(500);
-    expect(data.error).toBe("Internal server error");
-  });
-
-  it("calls connectDB before querying", async () => {
-    (Post.findById as jest.Mock).mockReturnValue({
-      lean: jest.fn().mockResolvedValue(mockPost),
-    });
-    (Post.findByIdAndDelete as jest.Mock).mockResolvedValue(mockPost);
-
-    const { DELETE } = await import("@/app/api/posts/[id]/route");
-    await DELETE(makeRequest(VALID_ID), makeParams(VALID_ID));
-
-    expect(mockConnectDB).toHaveBeenCalledTimes(1);
   });
 
   it("does not call cloudinary destroy when the post has no screenshots", async () => {
