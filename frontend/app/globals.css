@@ -1,20 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-main: #F4F7F9;
+  --font-main: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: var(--font-fira), 'Fira Code', monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg-main);
+  --font-sans: var(--font-main);
+  --font-mono: var(--font-mono);
 }
 
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-main);
+  color: #1E293B;
+  font-family: var(--font-main);
 }

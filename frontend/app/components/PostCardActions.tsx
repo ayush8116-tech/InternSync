@@ -27,19 +27,19 @@ export default function PostCardActions({ postId, onDelete }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2 px-6 py-3 border-t border-gray-100">
+    <>
       <Link
         href={`/posts/${postId}/edit`}
-        className="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors"
+        className="text-sm font-semibold text-slate-500 border border-slate-200 rounded-md px-3 py-1.5 hover:bg-slate-50 hover:border-slate-300 transition-colors"
       >
         Edit
       </Link>
       <button
         onClick={handleDelete}
-        className="text-xs font-medium text-red-400 hover:text-red-600 transition-colors"
+        className="text-sm font-semibold text-red-400 border border-red-200 rounded-md px-3 py-1.5 hover:bg-red-50 hover:border-red-300 transition-colors"
       >
         Delete
       </button>
-    </div>
+    </>
   );
 }

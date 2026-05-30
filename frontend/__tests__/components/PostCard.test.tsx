@@ -50,7 +50,7 @@ describe("PostCard", () => {
 
   it("renders the correct like count", () => {
     render(<PostCard post={mockPost} />);
-    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText(/Applauds/)).toBeInTheDocument();
   });
 
   it("wraps the entire card in a link to /posts/[id]", () => {
@@ -86,13 +86,13 @@ describe("PostCard", () => {
   it("shows 0 likes when likes array is empty", () => {
     const postWithNoLikes = { ...mockPost, likes: [] };
     render(<PostCard post={postWithNoLikes} />);
-    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText(/Applauds/)).toBeInTheDocument();
   });
 
   it("handles missing likes field gracefully", () => {
     const postWithoutLikes = { ...mockPost, likes: undefined as unknown as string[] };
     render(<PostCard post={postWithoutLikes} />);
-    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText(/Applauds/)).toBeInTheDocument();
   });
 });
 

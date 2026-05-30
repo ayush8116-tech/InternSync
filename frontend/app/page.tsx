@@ -44,73 +44,86 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen" style={{ background: "#F4F7F9" }}>
 
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
-        <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">InternSync</h1>
-            <p className="text-xs text-gray-400">Discover what your team is building</p>
-          </div>
+      {/* Navbar */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+        <div className="mx-auto max-w-[680px] px-4 py-4 flex items-center justify-between">
 
-          <div className="flex items-center gap-3">
+          {/* Brand */}
+          <h1
+            className="text-2xl font-extrabold bg-clip-text text-transparent"
+            style={{ backgroundImage: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)" }}
+          >
+            InternSync
+          </h1>
+
+          {/* Right side */}
+          <div className="flex items-center gap-4">
             {!authLoading && user ? (
               <>
                 <Link
                   href="/create-post"
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                  className="text-sm font-semibold text-white px-4 py-2 rounded-lg transition-all hover:-translate-y-0.5"
+                  style={{
+                    background: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)",
+                    boxShadow: "0 4px 12px rgba(99,102,241,0.35)",
+                  }}
                 >
-                  + Share Project
+                  ✨ Share Project
                 </Link>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <Image
                     src={user.avatarUrl}
                     alt={user.name}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
+                    width={34}
+                    height={34}
+                    className="rounded-full ring-2 ring-indigo-100"
                   />
-                  <span className="text-sm text-gray-600 font-medium hidden sm:block">
-                    {user.name}
+                  <span className="text-sm font-semibold text-slate-700 hidden sm:block">
+                    {user.login}
                   </span>
+                  <button
+                    onClick={logout}
+                    className="text-sm font-semibold text-slate-400 hover:text-red-500 transition-colors ml-1"
+                  >
+                    Logout
+                  </button>
                 </div>
-                <button
-                  onClick={logout}
-                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  Logout
-                </button>
               </>
             ) : !authLoading ? (
               <Link
                 href="/login"
-                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                className="text-sm font-semibold text-slate-500 border border-slate-200 px-4 py-2 rounded-lg hover:border-indigo-300 hover:text-indigo-600 transition-colors"
               >
                 Login
               </Link>
             ) : null}
           </div>
         </div>
-      </header>
+      </nav>
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      {/* Feed */}
+      <div className="mx-auto max-w-[680px] px-4 py-8">
 
         {/* Loading skeleton */}
         {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-pulse">
-                <div className="h-3 bg-gray-100 rounded w-1/3 mb-4" />
-                <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
-                <div className="h-3 bg-gray-100 rounded w-full mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-4/5" />
+          <div className="flex flex-col gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 animate-pulse">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-slate-100" />
+                  <div className="h-3 bg-slate-100 rounded w-24" />
+                </div>
+                <div className="h-5 bg-slate-200 rounded w-2/3 mb-3" />
+                <div className="h-3 bg-slate-100 rounded w-full mb-2" />
+                <div className="h-3 bg-slate-100 rounded w-4/5" />
               </div>
             ))}
           </div>
         )}
 
-        {/* Error state */}
+        {/* Error */}
         {!loading && error && (
           <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
             <p className="text-sm text-red-500">{error}</p>
@@ -119,12 +132,13 @@ export default function HomePage() {
 
         {/* Empty state */}
         {!loading && !error && posts.length === 0 && (
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-12 text-center">
-            <p className="text-gray-400 text-sm mb-4">No projects shared yet. Be the first!</p>
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <p className="text-slate-400 text-sm mb-4">No projects shared yet. Be the first!</p>
             {user && (
               <Link
                 href="/create-post"
-                className="inline-block rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                className="inline-block text-sm font-semibold text-white px-5 py-2.5 rounded-lg"
+                style={{ background: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)" }}
               >
                 Share your project
               </Link>
@@ -132,37 +146,34 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Posts grid */}
+        {/* Posts */}
         {!loading && !error && posts.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {posts.map((post) => (
-                <PostCard
-                  key={post._id}
-                  post={post}
-                  currentUserId={user?.login ?? ""}
-                  onDelete={() =>
-                    setPosts((prev) => prev.filter((p) => p._id !== post._id))
-                  }
-                />
-              ))}
-            </div>
+          <div className="flex flex-col gap-6">
+            {posts.map((post) => (
+              <PostCard
+                key={post._id}
+                post={post}
+                currentUserId={user?.login ?? ""}
+                onDelete={() =>
+                  setPosts((prev) => prev.filter((p) => p._id !== post._id))
+                }
+              />
+            ))}
 
-            {/* Load More */}
-            <div className="mt-8 flex justify-center">
+            <div className="flex justify-center pt-2">
               {hasMore ? (
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="rounded-lg border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-600 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-50 transition-colors shadow-sm"
+                  className="text-sm font-semibold text-slate-500 border border-slate-200 bg-white px-6 py-2.5 rounded-lg hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-50 transition-colors"
                 >
-                  {loadingMore ? "Loading..." : "Load More"}
+                  {loadingMore ? "Loading…" : "Load More"}
                 </button>
               ) : (
-                <p className="text-xs text-gray-400">You&apos;ve seen all projects</p>
+                <p className="text-xs text-slate-400">You&apos;ve seen all projects</p>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
     </main>
