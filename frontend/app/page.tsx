@@ -98,7 +98,12 @@ export default function HomePage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {posts.map((post) => (
-                <PostCard key={post._id} post={post} />
+                <PostCard
+                  key={post._id}
+                  post={post}
+                  currentUserId=""
+                  onDelete={() => setPosts((prev) => prev.filter((p) => p._id !== post._id))}
+                />
               ))}
             </div>
 
