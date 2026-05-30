@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import PostCardActions from "./PostCardActions";
 
 export interface Post {
@@ -10,6 +11,7 @@ export interface Post {
   screenshots: string[];
   tags: string[];
   authorId: string;
+  authorAvatar?: string;
   likes: string[];
   createdAt: string;
 }
@@ -22,7 +24,18 @@ function formatDate(dateStr: string) {
   });
 }
 
-function AuthorAvatar({ login }: { login: string }) {
+function AuthorAvatar({ login, avatarUrl }: { login: string; avatarUrl?: string }) {
+  if (avatarUrl) {
+    return (
+      <Image
+        src={avatarUrl}
+        alt={login}
+        width={32}
+        height={32}
+        className="rounded-full flex-shrink-0"
+      />
+    );
+  }
   return (
     <div
       className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
@@ -45,14 +58,13 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
   return (
     <article className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-200 flex flex-col overflow-hidden">
 
-      {/* Clickable body → post detail */}
       <Link href={`/posts/${post._id}`} className="flex flex-col gap-4 p-6 flex-1 group">
 
         {/* Author row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <AuthorAvatar login={post.authorId} />
-            <span className="text-sm font-700 text-slate-800 font-bold">{post.authorId}</span>
+            <AuthorAvatar login={post.authorId} avatarUrl={post.authorAvatar} />
+            <span className="text-sm font-bold text-slate-800">{post.authorId}</span>
           </div>
           <span className="text-xs text-slate-400">{formatDate(post.createdAt)}</span>
         </div>
@@ -85,13 +97,10 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
 
       {/* Footer */}
       <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-
-        {/* Like count */}
         <button className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-indigo-500 transition-colors">
           👏 {post.likes?.length ?? 0} Applauds
         </button>
 
-        {/* Right side: links + owner actions */}
         <div className="flex items-center gap-2">
           {post.githubLink && (
             <a

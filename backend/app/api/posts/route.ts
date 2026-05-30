@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
       screenshots: screenshots ?? [],
       tags: tags ?? [],
       authorId: user.login,
+      authorAvatar: user.avatarUrl,
     });
 
     return Response.json(post, { status: 201 });

@@ -8,6 +8,7 @@ export interface IPost extends Document {
   screenshots: string[];
   tags: string[];
   authorId: string;
+  authorAvatar?: string;
   likes: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +23,7 @@ const PostSchema = new Schema<IPost>(
     screenshots: { type: [String], default: [] },
     tags: { type: [String], default: [] },
     authorId: { type: String, required: true },
+    authorAvatar: { type: String },
     likes: { type: [String], default: [] },
   },
   { timestamps: true }
