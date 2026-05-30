@@ -171,7 +171,7 @@ describe("PostCard — owner actions", () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining(`/api/posts/${mockPost._id}`),
-        { method: "DELETE" }
+        { method: "DELETE", credentials: "include" }
       );
       expect(onDelete).toHaveBeenCalledTimes(1);
     });

@@ -20,6 +20,7 @@ export default function PostDetailActions({ postId }: Props) {
 
     const res = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
       method: "DELETE",
+      credentials: "include",
     });
 
     if (res.ok) {

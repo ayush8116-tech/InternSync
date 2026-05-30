@@ -69,7 +69,7 @@ describe("PostDetailActions", () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining(`/api/posts/${POST_ID}`),
-        { method: "DELETE" }
+        { method: "DELETE", credentials: "include" }
       );
       expect(mockPush).toHaveBeenCalledWith("/");
     });

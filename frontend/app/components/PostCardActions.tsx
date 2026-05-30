@@ -18,6 +18,7 @@ export default function PostCardActions({ postId, onDelete }: Props) {
 
     const res = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
       method: "DELETE",
+      credentials: "include",
     });
 
     if (res.ok) {
