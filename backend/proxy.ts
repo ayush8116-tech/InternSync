@@ -1,36 +1,37 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const allowedOrigins = ["http://localhost:8000"];
+const ALLOWED_ORIGINS = ["http://localhost:8000"];
 
-const corsOptions = {
+const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 export function proxy(request: NextRequest) {
   const origin = request.headers.get("origin") ?? "";
-  const isAllowedOrigin = allowedOrigins.includes(origin);
+  const isAllowed = ALLOWED_ORIGINS.includes(origin);
 
-  // Handle CORS preflight
   if (request.method === "OPTIONS") {
-    const preflightHeaders = {
-      ...(isAllowedOrigin && { "Access-Control-Allow-Origin": origin }),
-      ...corsOptions,
-    };
-    return NextResponse.json({}, { headers: preflightHeaders });
+    return NextResponse.json(
+      {},
+      {
+        headers: {
+          ...(isAllowed && { "Access-Control-Allow-Origin": origin }),
+          ...CORS_HEADERS,
+        },
+      }
+    );
   }
 
-  // Handle actual request
   const response = NextResponse.next();
 
-  if (isAllowedOrigin) {
+  if (isAllowed) {
     response.headers.set("Access-Control-Allow-Origin", origin);
   }
 
-  Object.entries(corsOptions).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => response.headers.set(k, v));
 
   return response;
 }
