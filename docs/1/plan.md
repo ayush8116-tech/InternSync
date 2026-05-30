@@ -229,3 +229,6 @@ export const config = { matcher: ['/create-post', '/posts/:id/edit'] }
    - Visit `/create-post` → form loads, post created with your login as authorId
    - Home feed shows Edit/Delete on your posts only
    - Visit `/posts/<id>/edit` for someone else's post → redirected to `/login` (middleware) OR backend returns 403
+
+## Status: Completed
+Implemented in 8 tasks. All tests passing (21 backend, 88 frontend). Final commit: c40b776.
