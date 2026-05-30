@@ -9,7 +9,7 @@ import { useAuth } from "./components/AuthProvider";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function HomePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -75,6 +75,12 @@ export default function HomePage() {
                     {user.name}
                   </span>
                 </div>
+                <button
+                  onClick={logout}
+                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  Logout
+                </button>
               </>
             ) : !authLoading ? (
               <Link
