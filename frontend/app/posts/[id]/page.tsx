@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Post } from "@/app/components/PostCard";
+import PostDetailActions from "./PostDetailActions";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -58,12 +59,7 @@ export default async function PostDetailPage({
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <BackLink />
-          <Link
-            href={`/posts/${post._id}/edit`}
-            className="rounded-lg border border-gray-200 px-4 py-1.5 text-sm font-medium text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
-          >
-            Edit
-          </Link>
+          <PostDetailActions postId={post._id} />
         </div>
       </header>
 

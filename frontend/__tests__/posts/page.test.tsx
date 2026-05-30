@@ -15,6 +15,19 @@ jest.mock("next/image", () => ({
   ),
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
+jest.mock("@/app/posts/[id]/PostDetailActions", () => ({
+  __esModule: true,
+  default: ({ postId }: { postId: string }) => (
+    <div data-testid="post-detail-actions" data-post-id={postId}>
+      <a href={`/posts/${postId}/edit`}>Edit</a>
+    </div>
+  ),
+}));
+
 const mockPost = {
   _id: "507f1f77bcf86cd799439011",
   title: "My Expense Tracker",
@@ -140,7 +153,13 @@ describe("Post detail page", () => {
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
     });
 
-    it("renders an Edit button linking to /posts/[id]/edit", async () => {
+    it("renders PostDetailActions with the correct postId", async () => {
+      await renderPage();
+      const actions = screen.getByTestId("post-detail-actions");
+      expect(actions).toHaveAttribute("data-post-id", mockPost._id);
+    });
+
+    it("renders an Edit link via PostDetailActions", async () => {
       await renderPage();
       const editLink = screen.getByRole("link", { name: /edit/i });
       expect(editLink).toHaveAttribute("href", `/posts/${mockPost._id}/edit`);
@@ -166,9 +185,9 @@ describe("Post detail page", () => {
       expect(screen.queryByRole("heading", { name: "My Expense Tracker" })).not.toBeInTheDocument();
     });
 
-    it("does not render an Edit button", async () => {
+    it("does not render PostDetailActions", async () => {
       await renderPage();
-      expect(screen.queryByRole("link", { name: /edit/i })).not.toBeInTheDocument();
+      expect(screen.queryByTestId("post-detail-actions")).not.toBeInTheDocument();
     });
   });
 });
