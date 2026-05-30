@@ -12,6 +12,7 @@ export default function EditPostForm({ post }: { post: Post }) {
   async function handleSubmit(data: PostFormValues) {
     const res = await fetch(`${BACKEND_URL}/api/posts/${post._id}`, {
       method: "PATCH",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });

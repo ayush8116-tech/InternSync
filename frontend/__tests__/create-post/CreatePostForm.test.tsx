@@ -39,7 +39,7 @@ describe("CreatePostForm", () => {
     expect(screen.getByPlaceholderText(/what did you build/i)).toHaveValue("");
   });
 
-  it("calls POST /api/posts with correct payload on submit", async () => {
+  it("calls POST /api/posts with credentials and correct payload on submit", async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ _id: "abc123" }),
@@ -53,6 +53,7 @@ describe("CreatePostForm", () => {
         expect.stringContaining("/api/posts"),
         expect.objectContaining({
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: expect.stringContaining("My Project"),
         })
@@ -60,7 +61,7 @@ describe("CreatePostForm", () => {
     });
   });
 
-  it("includes authorId in the POST payload", async () => {
+  it("does not include authorId in the POST payload (backend reads from JWT)", async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ _id: "abc123" }),
@@ -73,7 +74,7 @@ describe("CreatePostForm", () => {
       const body = JSON.parse(
         (global.fetch as jest.Mock).mock.calls[0][1].body
       );
-      expect(body.authorId).toBe("placeholder_author");
+      expect(body.authorId).toBeUndefined();
     });
   });
 

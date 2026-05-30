@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import PostCard, { Post } from "./components/PostCard";
+import { useAuth } from "./components/AuthProvider";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function HomePage() {
+  const { user, loading: authLoading } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -16,10 +19,12 @@ export default function HomePage() {
 
   async function fetchPosts(pageNum: number, append = false) {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/posts?page=${pageNum}`);
+      const res = await fetch(`${BACKEND_URL}/api/posts?page=${pageNum}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to load posts");
       const data = await res.json();
-      setPosts((prev) => append ? [...prev, ...data.posts] : data.posts);
+      setPosts((prev) => (append ? [...prev, ...data.posts] : data.posts));
       setHasMore(data.hasMore);
     } catch {
       setError("Could not load posts. Make sure the backend is running.");
@@ -48,12 +53,38 @@ export default function HomePage() {
             <h1 className="text-lg font-bold text-gray-900">InternSync</h1>
             <p className="text-xs text-gray-400">Discover what your team is building</p>
           </div>
-          <Link
-            href="/create-post"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
-          >
-            + Share Project
-          </Link>
+
+          <div className="flex items-center gap-3">
+            {!authLoading && user ? (
+              <>
+                <Link
+                  href="/create-post"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                >
+                  + Share Project
+                </Link>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm text-gray-600 font-medium hidden sm:block">
+                    {user.name}
+                  </span>
+                </div>
+              </>
+            ) : !authLoading ? (
+              <Link
+                href="/login"
+                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+              >
+                Login
+              </Link>
+            ) : null}
+          </div>
         </div>
       </header>
 
@@ -84,12 +115,14 @@ export default function HomePage() {
         {!loading && !error && posts.length === 0 && (
           <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-12 text-center">
             <p className="text-gray-400 text-sm mb-4">No projects shared yet. Be the first!</p>
-            <Link
-              href="/create-post"
-              className="inline-block rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
-            >
-              Share your project
-            </Link>
+            {user && (
+              <Link
+                href="/create-post"
+                className="inline-block rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+              >
+                Share your project
+              </Link>
+            )}
           </div>
         )}
 
@@ -101,8 +134,10 @@ export default function HomePage() {
                 <PostCard
                   key={post._id}
                   post={post}
-                  currentUserId=""
-                  onDelete={() => setPosts((prev) => prev.filter((p) => p._id !== post._id))}
+                  currentUserId={user?.login ?? ""}
+                  onDelete={() =>
+                    setPosts((prev) => prev.filter((p) => p._id !== post._id))
+                  }
                 />
               ))}
             </div>

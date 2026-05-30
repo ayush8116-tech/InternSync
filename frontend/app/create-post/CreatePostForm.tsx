@@ -12,7 +12,8 @@ export default function CreatePostForm() {
     const res = await fetch(`${BACKEND_URL}/api/posts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, authorId: "placeholder_author" }),
+      credentials: "include",
+      body: JSON.stringify(data),
     });
 
     if (!res.ok) {
