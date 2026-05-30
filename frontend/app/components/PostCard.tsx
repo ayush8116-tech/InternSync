@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PostCardActions from "./PostCardActions";
 
 export interface Post {
   _id: string;
@@ -43,7 +44,14 @@ function LikeCount({ count }: { count: number }) {
   );
 }
 
-export default function PostCard({ post }: { post: Post }) {
+interface PostCardProps {
+  post: Post;
+  currentUserId?: string;
+  onDelete?: () => void;
+}
+
+export default function PostCard({ post, currentUserId, onDelete }: PostCardProps) {
+  const isOwner = !!currentUserId && currentUserId === post.authorId;
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
 
@@ -105,6 +113,10 @@ export default function PostCard({ post }: { post: Post }) {
         </div>
         <LikeCount count={post.likes?.length ?? 0} />
       </div>
+
+      {isOwner && onDelete && (
+        <PostCardActions postId={post._id} onDelete={onDelete} />
+      )}
     </div>
   );
 }

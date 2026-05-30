@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import PostCard, { Post } from "@/app/components/PostCard";
 
 // Mock next/link to render a plain <a> so href is testable in jsdom
@@ -93,5 +93,102 @@ describe("PostCard", () => {
     const postWithoutLikes = { ...mockPost, likes: undefined as unknown as string[] };
     render(<PostCard post={postWithoutLikes} />);
     expect(screen.getByText("0")).toBeInTheDocument();
+  });
+});
+
+describe("PostCard — owner actions", () => {
+  const onDelete = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+    window.confirm = jest.fn();
+  });
+
+  it("shows Edit and Delete when currentUserId matches authorId", () => {
+    render(
+      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
+    );
+    expect(screen.getByRole("link", { name: /^edit$/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
+  });
+
+  it("hides Edit and Delete when currentUserId is empty", () => {
+    render(<PostCard post={mockPost} currentUserId="" onDelete={onDelete} />);
+    expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^edit$/i })).not.toBeInTheDocument();
+  });
+
+  it("hides Edit and Delete when currentUserId does not match authorId", () => {
+    render(
+      <PostCard post={mockPost} currentUserId="someone_else" onDelete={onDelete} />
+    );
+    expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
+  });
+
+  it("hides Edit and Delete when no currentUserId prop is provided", () => {
+    render(<PostCard post={mockPost} onDelete={onDelete} />);
+    expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
+  });
+
+  it("Edit link points to /posts/[id]/edit", () => {
+    render(
+      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
+    );
+    const editLink = screen.getByRole("link", { name: /^edit$/i });
+    expect(editLink).toHaveAttribute("href", `/posts/${mockPost._id}/edit`);
+  });
+
+  it("calls window.confirm when Delete is clicked", () => {
+    (window.confirm as jest.Mock).mockReturnValue(false);
+    render(
+      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(window.confirm).toHaveBeenCalledWith(
+      "Are you sure you want to delete this post? This cannot be undone."
+    );
+  });
+
+  it("does not call fetch when confirmation is cancelled", () => {
+    (window.confirm as jest.Mock).mockReturnValue(false);
+    render(
+      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("calls DELETE fetch and onDelete when confirmed", async () => {
+    (window.confirm as jest.Mock).mockReturnValue(true);
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
+
+    render(
+      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/api/posts/${mockPost._id}`),
+        { method: "DELETE" }
+      );
+      expect(onDelete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("does not call onDelete when the DELETE request fails", async () => {
+    (window.confirm as jest.Mock).mockReturnValue(true);
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
+
+    render(
+      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+    expect(onDelete).not.toHaveBeenCalled();
   });
 });
