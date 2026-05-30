@@ -24,25 +24,15 @@ function formatDate(dateStr: string) {
   });
 }
 
-function AuthorAvatar({ login, avatarUrl }: { login: string; avatarUrl?: string }) {
-  if (avatarUrl) {
-    return (
-      <Image
-        src={avatarUrl}
-        alt={login}
-        width={32}
-        height={32}
-        className="rounded-full flex-shrink-0"
-      />
-    );
-  }
+function AuthorAvatar({ login }: { login: string }) {
   return (
-    <div
-      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-      style={{ background: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)" }}
-    >
-      {login[0]?.toUpperCase()}
-    </div>
+    <Image
+      src={`https://github.com/${login}.png?size=64`}
+      alt={login}
+      width={32}
+      height={32}
+      className="rounded-full flex-shrink-0"
+    />
   );
 }
 
@@ -63,7 +53,7 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
         {/* Author row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <AuthorAvatar login={post.authorId} avatarUrl={post.authorAvatar} />
+            <AuthorAvatar login={post.authorId} />
             <span className="text-sm font-bold text-slate-800">{post.authorId}</span>
           </div>
           <span className="text-xs text-slate-400">{formatDate(post.createdAt)}</span>
