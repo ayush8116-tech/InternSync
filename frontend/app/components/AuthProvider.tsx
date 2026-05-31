@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export interface AuthUser {
-  sub: string;
+  sub?: string;
   login: string;
   name: string;
   avatarUrl: string;
@@ -14,12 +14,14 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
+  login: (user: AuthUser) => void;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
+  login: () => {},
   logout: async () => {},
 });
 
@@ -39,6 +41,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       .finally(() => setLoading(false));
   }, []);
 
+  function login(userData: AuthUser) {
+    setUser(userData);
+  }
+
   async function logout() {
     await fetch(`${BACKEND_URL}/api/auth/logout`, {
       method: "POST",
@@ -49,7 +55,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

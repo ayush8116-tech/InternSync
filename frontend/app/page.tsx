@@ -124,13 +124,22 @@ export default function HomePage() {
                   ✨ Share Project
                 </Link>
                 <div className="flex items-center gap-2.5">
-                  <Image
-                    src={user.avatarUrl}
-                    alt={user.name}
-                    width={34}
-                    height={34}
-                    className="rounded-full ring-2 ring-indigo-100"
-                  />
+                  {user.avatarUrl ? (
+                    <Image
+                      src={user.avatarUrl}
+                      alt={user.name}
+                      width={34}
+                      height={34}
+                      className="rounded-full ring-2 ring-indigo-100"
+                    />
+                  ) : (
+                    <div
+                      className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-sm font-bold ring-2 ring-indigo-100"
+                      style={{ background: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)" }}
+                    >
+                      {user.login[0]?.toUpperCase()}
+                    </div>
+                  )}
                   <span className="text-sm font-semibold text-slate-700 hidden sm:block">
                     {user.login}
                   </span>
