@@ -21,6 +21,11 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-const User = mongoose.models.User ?? mongoose.model<IUser>("User", UserSchema);
+// In dev, delete the cached model so schema changes are picked up on hot reload
+if (process.env.NODE_ENV !== "production" && mongoose.models.User) {
+  delete (mongoose.models as Record<string, unknown>).User;
+}
+
+const User = mongoose.model<IUser>("User", UserSchema);
 
 export default User;
