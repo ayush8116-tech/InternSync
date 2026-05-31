@@ -16,13 +16,19 @@ export default function PostCardActions({ postId, onDelete }: Props) {
     );
     if (!confirmed) return;
 
-    const res = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    if (res.ok) {
-      onDelete();
+      if (res.ok) {
+        onDelete();
+      } else {
+        alert("Failed to delete post. Please try again.");
+      }
+    } catch {
+      alert("Network error — make sure the backend is running.");
     }
   }
 

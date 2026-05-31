@@ -18,6 +18,18 @@ function extractPublicId(url: string): string | null {
   return match ? match[1] : null;
 }
 
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": process.env.FRONTEND_URL ?? "http://localhost:8000",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Credentials": "true",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
