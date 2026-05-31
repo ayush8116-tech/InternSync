@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import PostCardActions from "./PostCardActions";
+import LikeButton from "./LikeButton";
 
 export interface Post {
   _id: string;
@@ -87,9 +88,7 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
 
       {/* Footer */}
       <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-        <button className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-indigo-500 transition-colors">
-          👏 {post.likes?.length ?? 0} Applauds
-        </button>
+        <LikeButton postId={post._id} initialLikes={post.likes ?? []} />
 
         <div className="flex items-center gap-2">
           {post.githubLink && (

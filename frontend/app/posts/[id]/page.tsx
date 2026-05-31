@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Post } from "@/app/components/PostCard";
 import PostDetailActions from "./PostDetailActions";
+import LikeButton from "@/app/components/LikeButton";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -142,23 +143,9 @@ export default async function PostDetailPage({
             </div>
           )}
 
-          {/* Like count */}
-          <div className="flex items-center gap-1.5 text-sm text-gray-400 pt-6 border-t border-gray-100">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 text-gray-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-            {post.likes?.length ?? 0}
+          {/* Like button */}
+          <div className="pt-6 border-t border-gray-100">
+            <LikeButton postId={post._id} initialLikes={post.likes ?? []} />
           </div>
         </div>
       </div>

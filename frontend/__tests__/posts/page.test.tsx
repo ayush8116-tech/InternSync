@@ -19,6 +19,13 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
+jest.mock("@/app/components/LikeButton", () => ({
+  __esModule: true,
+  default: ({ initialLikes }: { postId: string; initialLikes: string[] }) => (
+    <button data-testid="like-button">👏 {initialLikes.length} Applauds</button>
+  ),
+}));
+
 jest.mock("@/app/posts/[id]/PostDetailActions", () => ({
   __esModule: true,
   default: ({ postId }: { postId: string }) => (
@@ -95,9 +102,9 @@ describe("Post detail page", () => {
       expect(screen.getByText("MongoDB")).toBeInTheDocument();
     });
 
-    it("renders the correct like count", async () => {
+    it("renders the like button with correct count", async () => {
       await renderPage();
-      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByTestId("like-button")).toBeInTheDocument();
     });
 
     it("renders the GitHub link with correct href", async () => {
