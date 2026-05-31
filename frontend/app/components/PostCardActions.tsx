@@ -4,8 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
 interface Props {
   postId: string;
   onDelete: () => void;
@@ -13,28 +11,6 @@ interface Props {
 
 export default function PostCardActions({ postId, onDelete }: Props) {
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  async function handleConfirm() {
-    setLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        setShowModal(false);
-        onDelete();
-      } else {
-        alert("Failed to delete post. Please try again.");
-      }
-    } catch {
-      alert("Network error — make sure the backend is running.");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <>
@@ -53,9 +29,8 @@ export default function PostCardActions({ postId, onDelete }: Props) {
 
       <DeleteConfirmModal
         isOpen={showModal}
-        onConfirm={handleConfirm}
+        onConfirm={() => { setShowModal(false); onDelete(); }}
         onCancel={() => setShowModal(false)}
-        loading={loading}
       />
     </>
   );

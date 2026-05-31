@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import PostCard, { Post } from "./components/PostCard";
+import UndoToast from "./components/UndoToast";
 import { useAuth } from "./components/AuthProvider";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const UNDO_WINDOW_MS = 10_000;
+
+interface PendingDelete {
+  post: Post;
+  originalIndex: number;
+  toastKey: number;
+}
 
 export default function HomePage() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -16,6 +24,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastKeyRef = useRef(0);
 
   async function fetchPosts(pageNum: number, append = false) {
     try {
@@ -35,6 +46,49 @@ export default function HomePage() {
     fetchPosts(1).finally(() => setLoading(false));
   }, []);
 
+  // Commit the pending delete to the backend when timer fires
+  function scheduleDelete(post: Post) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
+      await fetch(`${BACKEND_URL}/api/posts/${post._id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      setPendingDelete(null);
+    }, UNDO_WINDOW_MS);
+  }
+
+  function handleDeletePost(post: Post) {
+    // If there's already a pending delete, commit it immediately before starting a new one
+    if (pendingDelete && timerRef.current) {
+      clearTimeout(timerRef.current);
+      fetch(`${BACKEND_URL}/api/posts/${pendingDelete.post._id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+    }
+
+    const originalIndex = posts.findIndex((p) => p._id === post._id);
+    setPosts((prev) => prev.filter((p) => p._id !== post._id));
+
+    toastKeyRef.current += 1;
+    setPendingDelete({ post, originalIndex, toastKey: toastKeyRef.current });
+    scheduleDelete(post);
+  }
+
+  function handleUndo() {
+    if (!pendingDelete || !timerRef.current) return;
+    clearTimeout(timerRef.current);
+    timerRef.current = null;
+    setPosts((prev) => {
+      const next = [...prev];
+      const at = Math.min(pendingDelete.originalIndex, next.length);
+      next.splice(at, 0, pendingDelete.post);
+      return next;
+    });
+    setPendingDelete(null);
+  }
+
   async function handleLoadMore() {
     const nextPage = page + 1;
     setLoadingMore(true);
@@ -49,8 +103,6 @@ export default function HomePage() {
       {/* Navbar */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-10" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
         <div className="mx-auto max-w-[680px] px-4 py-4 flex items-center justify-between">
-
-          {/* Brand */}
           <h1
             className="text-2xl font-extrabold bg-clip-text text-transparent"
             style={{ backgroundImage: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)" }}
@@ -58,7 +110,6 @@ export default function HomePage() {
             InternSync
           </h1>
 
-          {/* Right side */}
           <div className="flex items-center gap-4">
             {!authLoading && user ? (
               <>
@@ -106,6 +157,17 @@ export default function HomePage() {
       {/* Feed */}
       <div className="mx-auto max-w-[680px] px-4 py-8">
 
+        {/* Undo toast — top of feed, no overlay */}
+        {pendingDelete && (
+          <div className="mb-5">
+            <UndoToast
+              title={pendingDelete.post.title}
+              toastKey={pendingDelete.toastKey}
+              onUndo={handleUndo}
+            />
+          </div>
+        )}
+
         {/* Loading skeleton */}
         {loading && (
           <div className="flex flex-col gap-6">
@@ -131,7 +193,7 @@ export default function HomePage() {
         )}
 
         {/* Empty state */}
-        {!loading && !error && posts.length === 0 && (
+        {!loading && !error && posts.length === 0 && !pendingDelete && (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
             <p className="text-slate-400 text-sm mb-4">No projects shared yet. Be the first!</p>
             {user && (
@@ -154,9 +216,7 @@ export default function HomePage() {
                 key={post._id}
                 post={post}
                 currentUserId={user?.login ?? ""}
-                onDelete={() =>
-                  setPosts((prev) => prev.filter((p) => p._id !== post._id))
-                }
+                onDelete={() => handleDeletePost(post)}
               />
             ))}
 

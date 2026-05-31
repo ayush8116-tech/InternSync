@@ -155,29 +155,7 @@ describe("PostCard — owner actions", () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it("calls DELETE fetch and onDelete when confirmed in modal", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
-
-    render(
-      <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
-    );
-    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
-    // Click the Delete button inside the modal
-    const modalDelete = screen.getAllByRole("button", { name: /^delete$/i })[1];
-    fireEvent.click(modalDelete);
-
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining(`/api/posts/${mockPost._id}`),
-        { method: "DELETE", credentials: "include" }
-      );
-      expect(onDelete).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it("does not call onDelete when the DELETE request fails", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
-
+  it("calls onDelete when confirmed in modal", () => {
     render(
       <PostCard post={mockPost} currentUserId="intern_john" onDelete={onDelete} />
     );
@@ -185,9 +163,6 @@ describe("PostCard — owner actions", () => {
     const modalDelete = screen.getAllByRole("button", { name: /^delete$/i })[1];
     fireEvent.click(modalDelete);
 
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalled();
-    });
-    expect(onDelete).not.toHaveBeenCalled();
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 });
