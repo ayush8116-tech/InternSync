@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import PostDetailActions from "@/app/posts/[id]/PostDetailActions";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -14,57 +15,47 @@ jest.mock("next/navigation", () => ({
 
 const POST_ID = "507f1f77bcf86cd799439011";
 
-async function renderActions(postId = POST_ID) {
-  const { default: PostDetailActions } = await import(
-    "@/app/posts/[id]/PostDetailActions"
-  );
-  return render(<PostDetailActions postId={postId} />);
-}
-
 describe("PostDetailActions", () => {
   beforeEach(() => {
-    jest.resetModules();
     mockPush.mockClear();
     global.fetch = jest.fn();
-    window.confirm = jest.fn();
   });
 
-  it("renders Edit link and Delete button", async () => {
-    await renderActions();
+  it("renders Edit link and Delete button", () => {
+    render(<PostDetailActions postId={POST_ID} />);
     expect(screen.getByRole("link", { name: /edit/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^delete$/i })).toBeInTheDocument();
   });
 
-  it("Edit link points to /posts/[id]/edit", async () => {
-    await renderActions();
+  it("Edit link points to /posts/[id]/edit", () => {
+    render(<PostDetailActions postId={POST_ID} />);
     expect(screen.getByRole("link", { name: /edit/i })).toHaveAttribute(
       "href",
       `/posts/${POST_ID}/edit`
     );
   });
 
-  it("calls window.confirm when Delete is clicked", async () => {
-    (window.confirm as jest.Mock).mockReturnValue(false);
-    await renderActions();
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
-    expect(window.confirm).toHaveBeenCalledWith(
-      "Are you sure you want to delete this post? This cannot be undone."
-    );
+  it("shows confirmation modal when Delete is clicked", () => {
+    render(<PostDetailActions postId={POST_ID} />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    expect(screen.getByText(/Are you sure/i)).toBeInTheDocument();
   });
 
-  it("does not fetch when confirmation is cancelled", async () => {
-    (window.confirm as jest.Mock).mockReturnValue(false);
-    await renderActions();
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+  it("does not fetch when Cancel is clicked in modal", () => {
+    render(<PostDetailActions postId={POST_ID} />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it("calls DELETE and redirects to / on confirmation", async () => {
-    (window.confirm as jest.Mock).mockReturnValue(true);
+  it("calls DELETE and redirects to / when confirmed", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
 
-    await renderActions();
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    render(<PostDetailActions postId={POST_ID} />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    // The modal's Delete button
+    const buttons = screen.getAllByRole("button", { name: /^delete$/i });
+    fireEvent.click(buttons[buttons.length - 1]);
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -76,11 +67,12 @@ describe("PostDetailActions", () => {
   });
 
   it("does not redirect when DELETE request fails", async () => {
-    (window.confirm as jest.Mock).mockReturnValue(true);
     (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
 
-    await renderActions();
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    render(<PostDetailActions postId={POST_ID} />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    const buttons = screen.getAllByRole("button", { name: /^delete$/i });
+    fireEvent.click(buttons[buttons.length - 1]);
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalled();
