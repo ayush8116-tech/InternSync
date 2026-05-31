@@ -59,7 +59,7 @@ export default async function PostDetailPage({
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <BackLink />
-          <PostDetailActions postId={post._id} />
+          <PostDetailActions postId={post._id} authorId={post.authorId} />
         </div>
       </header>
 

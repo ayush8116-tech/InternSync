@@ -3,18 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/components/AuthProvider";
 import DeleteConfirmModal from "@/app/components/DeleteConfirmModal";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface Props {
   postId: string;
+  authorId: string;
 }
 
-export default function PostDetailActions({ postId }: Props) {
+export default function PostDetailActions({ postId, authorId }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Only render buttons for the post owner
+  if (!user || user.login !== authorId) return null;
 
   async function handleConfirm() {
     setLoading(true);
