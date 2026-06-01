@@ -1,5 +1,13 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+export interface IComment {
+  _id: mongoose.Types.ObjectId;
+  text: string;
+  authorId: string;
+  authorAvatar?: string;
+  createdAt: Date;
+}
+
 export interface IPost extends Document {
   title: string;
   description: string;
@@ -10,9 +18,19 @@ export interface IPost extends Document {
   authorId: string;
   authorAvatar?: string;
   likes: string[];
+  comments: IComment[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const CommentSchema = new Schema<IComment>(
+  {
+    text: { type: String, required: true, trim: true },
+    authorId: { type: String, required: true },
+    authorAvatar: { type: String },
+  },
+  { timestamps: true }
+);
 
 const PostSchema = new Schema<IPost>(
   {
@@ -25,6 +43,7 @@ const PostSchema = new Schema<IPost>(
     authorId: { type: String, required: true },
     authorAvatar: { type: String },
     likes: { type: [String], default: [] },
+    comments: { type: [CommentSchema], default: [] },
   },
   { timestamps: true }
 );

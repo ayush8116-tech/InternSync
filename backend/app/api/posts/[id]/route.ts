@@ -153,7 +153,7 @@ export async function PATCH(
         screenshots: screenshots ?? [],
         tags: tags ?? [],
       },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     ).lean();
 
     return Response.json(post, { status: 200 });

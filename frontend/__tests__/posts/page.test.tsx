@@ -35,6 +35,16 @@ jest.mock("@/app/posts/[id]/PostDetailActions", () => ({
   ),
 }));
 
+// Mock CommentSection — its behaviour is covered in CommentSection.test.tsx
+jest.mock("@/app/components/CommentSection", () => ({
+  __esModule: true,
+  default: ({ postId, initialComments }: { postId: string; initialComments: unknown[] }) => (
+    <div data-testid="comment-section" data-post-id={postId}>
+      {initialComments.length} comments
+    </div>
+  ),
+}));
+
 const mockPost = {
   _id: "507f1f77bcf86cd799439011",
   title: "My Expense Tracker",
@@ -48,6 +58,7 @@ const mockPost = {
   tags: ["React", "Node.js", "MongoDB"],
   authorId: "intern_john",
   likes: ["user1", "user2", "user3"],
+  comments: [],
   createdAt: "2024-01-15T10:00:00.000Z",
 };
 

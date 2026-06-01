@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Post } from "@/app/components/PostCard";
 import PostDetailActions from "./PostDetailActions";
 import LikeButton from "@/app/components/LikeButton";
+import CommentSection from "@/app/components/CommentSection";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -147,6 +148,12 @@ export default async function PostDetailPage({
           <div className="pt-6 border-t border-gray-100">
             <LikeButton postId={post._id} initialLikes={post.likes ?? []} />
           </div>
+
+          {/* Comments */}
+          <CommentSection
+            postId={post._id}
+            initialComments={post.comments ?? []}
+          />
         </div>
       </div>
     </main>

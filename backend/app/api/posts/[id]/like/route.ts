@@ -45,7 +45,7 @@ export async function PATCH(
       alreadyLiked
         ? { $pull: { likes: user.login } }
         : { $push: { likes: user.login } },
-      { new: true }
+      { returnDocument: "after" }
     ).lean();
 
     return Response.json({ likes: updated!.likes }, { status: 200, headers: CORS_HEADERS });

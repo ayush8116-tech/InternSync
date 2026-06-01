@@ -3,6 +3,14 @@ import Image from "next/image";
 import PostCardActions from "./PostCardActions";
 import LikeButton from "./LikeButton";
 
+export interface Comment {
+  _id: string;
+  text: string;
+  authorId: string;
+  authorAvatar?: string;
+  createdAt: string;
+}
+
 export interface Post {
   _id: string;
   title: string;
@@ -14,6 +22,7 @@ export interface Post {
   authorId: string;
   authorAvatar?: string;
   likes: string[];
+  comments: Comment[];
   createdAt: string;
 }
 
@@ -88,7 +97,18 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
 
       {/* Footer */}
       <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-        <LikeButton postId={post._id} initialLikes={post.likes ?? []} />
+        <div className="flex items-center gap-4">
+          <LikeButton postId={post._id} initialLikes={post.likes ?? []} />
+          <Link
+            href={`/posts/${post._id}`}
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            {post.comments?.length ?? 0}
+          </Link>
+        </div>
 
         <div className="flex items-center gap-2">
           {post.githubLink && (

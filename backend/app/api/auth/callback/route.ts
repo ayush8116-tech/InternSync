@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     const user = await User.findOneAndUpdate(
       { githubId: String(githubId) },
       { login, name: name ?? login, avatarUrl },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, returnDocument: "after", runValidators: true }
     );
 
     // Sign JWT and set httpOnly cookie
