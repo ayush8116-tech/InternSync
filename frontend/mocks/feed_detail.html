@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InternSync - Project Deep Dive: ayush</title>
+  <style>
+    /* established fonts & colors from previous theme */
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      /* theme color palette */
+      --bg-main: #F4F7F9;
+      /* light, warm gray */
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+
+      /* energetic accents */
+      --brand-gradient: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);
+      --accent-purple: #8B5CF6;
+      --accent-green: #10B981;
+      --accent-orange: #F59E0B;
+      --border-light: #E2E8F0;
+
+      /* typography */
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      font-family: var(--font-main);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Page Layout --- */
+    .app-layout {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* --- Detail Navbar (Centered structure) --- */
+    .detail-navbar {
+      background-color: transparent;
+      padding: 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      position: sticky;
+      top: 1rem;
+      z-index: 10;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-link {
+      color: var(--accent-purple);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    /* standardized button styles from previous mockup */
+    .btn-outline {
+      border: 1px solid var(--border-light);
+      background: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-outline:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+
+    .btn-delete:hover {
+      border-color: #FECACA;
+      color: #DC2626;
+      background: #FFF1F2;
+    }
+
+    /* --- Constrained Center Content --- */
+    .centered-content {
+      max-width: 740px;
+      /* Constrains detail page so it doesn't look empty/stretched */
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* --- Main Project Deep Dive Card --- */
+    .project-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Card Header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1.5rem;
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: #E0E7FF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .post-meta {
+      color: var(--text-muted);
+      font-weight: 400;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Badges */
+    .badge-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge.help {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--accent-orange);
+    }
+
+    .badge.collab {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--accent-purple);
+    }
+
+    /* Prominent Title */
+    .card-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 2rem;
+    }
+
+    /* Structured Post Content */
+    .post-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .post-content p {
+      font-size: 1rem;
+      color: #334155;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* The Learning Box (Driving Education) */
+    .learning-box {
+      background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+      border-left: 4px solid var(--accent-green);
+      padding: 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin-bottom: 2rem;
+    }
+
+    .learning-box h4 {
+      font-size: 0.9rem;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .learning-box p {
+      font-size: 0.95rem;
+      font-style: italic;
+      color: #166534;
+      font-weight: 500;
+    }
+
+    /* Card Footer Actions */
+    .card-footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tech-stack {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: #F1F5F9;
+      color: #334155;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .btn-action {
+      background: none;
+      border: none;
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .btn-action:hover {
+      color: var(--accent-blue);
+    }
+
+    /* Standardized GitHub Button */
+    .btn-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      background-color: #0F172A;
+      color: white;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .btn-github:hover {
+      background-color: #1E293B;
+    }
+
+    /* --- Discussion & Ideas Hub --- */
+    .discussion-hub {
+      margin-bottom: 3rem;
+    }
+
+    .discussion-hub h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .add-idea-area {
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .add-idea-area input {
+      flex-grow: 1;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+    }
+
+    .add-idea-area input:focus {
+      outline: none;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-layout">
+
+    <main class="centered-content">
+
+      <nav class="detail-navbar">
+        <div class="nav-left">
+          <a href="#" class="back-link">
+            &larr; <span
+              style="font-size:1.1rem; font-weight:400; vertical-align:middle; display:inline-block; margin-right:2px; margin-top:-2px;"></span>
+            Back to discovery
+          </a>
+        </div>
+        <div class="nav-right">
+          <button class="btn-outline">Edit Deep Dive</button>
+          <button class="btn-outline btn-delete">Delete</button>
+        </div>
+      </nav>
+
+      <article class="project-card">
+
+        <div class="card-header">
+          <div class="author-info">
+            <div class="avatar">👨‍💻</div>
+            <div>
+              ayush8116-tech
+              <div class="post-meta">Intern • May 31, 2026</div>
+            </div>
+          </div>
+          <div class="badge-group">
+            <span class="badge help">⚠️ Needs Help/Feedback</span>
+          </div>
+        </div>
+
+        <h1 class="card-title">ayush</h1>
+
+        <div class="post-content">
+          <h3>The Problem We Solved</h3>
+          <p>The original `image_1.png` didn't explicitly state the problem, but here, we structure the post to force
+            the writer to think about what challenge they tackled.</p>
+
+          <h3>The Idea / Solution</h3>
+          <p>This is where the randomized text from the screenshot would go. E.g., This is the initial version of the
+            GitHub automation. We changed the workflow to support multiple repository structures automatically.</p>
+
+          <div class="learning-box">
+            <h4>💡 Key Learnings</h4>
+            <p>"We learned that API rate limits for automated checks hit much faster than expected! We had to implement
+              a local caching layer for metadata to keep the application responsive."</p>
+          </div>
+
+          <h3>⚠️ Struggles & Blockers (The collaboration catalyst)</h3>
+          <p>We need feedback on how to optimize the token usage in the backend logic. Also, if anyone knows how to
+            perfectly synchronize cursors across devices for a collaborative whiteboard, please reach out!</p>
+        </div>
+
+        <div class="card-footer">
+          <div class="tech-stack">
+            <span class="tag">Node.js</span>
+            <span class="tag">GitHub API</span>
+            <span class="tag">Docker</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="action-group">
+              <button class="btn-action">👏 12 Applauds</button>
+            </div>
+            <a href="#" class="btn-github">GitHub Repo &rarr;</a>
+          </div>
+        </div>
+      </article>
+
+      <section class="discussion-hub">
+        <h2>Discussion & Ideas (3)</h2>
+        <div class="add-idea-area">
+          <div class="avatar" style="width:32px; height:32px; font-size:1rem;">🧑‍💻</div>
+          <input type="text" placeholder="Add an improvement idea or ask a question...">
+          <button class="btn-outline" style="border-color: var(--accent-purple); color: var(--accent-purple);">Add
+            Idea</button>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+</body>
+
+</html>

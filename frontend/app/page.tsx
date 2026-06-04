@@ -28,7 +28,7 @@ export default function HomePage() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastKeyRef = useRef(0);
 
-  async function fetchPosts(pageNum: number, append = false) {
+  async function fetchPosts(pageNum: number, append = false, attempt = 1) {
     try {
       const res = await fetch(`${BACKEND_URL}/api/posts?page=${pageNum}`, {
         credentials: "include",
@@ -38,6 +38,10 @@ export default function HomePage() {
       setPosts((prev) => (append ? [...prev, ...data.posts] : data.posts));
       setHasMore(data.hasMore);
     } catch {
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, attempt * 1000));
+        return fetchPosts(pageNum, append, attempt + 1);
+      }
       setError("Could not load posts. Make sure the backend is running.");
     }
   }

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InternSync - Ideas & Collaboration</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      /* Energetic & Warm Theme */
+      --bg-main: #F4F7F9;         
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;        
+      --text-muted: #64748B;
+      
+      /* Vibrant Accents */
+      --brand-gradient: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);
+      --accent-purple: #8B5CF6;
+      --accent-blue: #3B82F6;
+      --accent-green: #10B981;
+      
+      --border-light: #E2E8F0;
+
+      /* Typography */
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-main);
+      font-family: var(--font-main);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Navbar --- */
+    .navbar {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-light);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    }
+
+    .nav-brand { display: flex; align-items: center; gap: 0.5rem; }
+    .nav-brand h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--brand-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 1.5rem; }
+    
+    .btn-gradient {
+      background: var(--brand-gradient);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4); }
+
+    .user-profile { display: flex; align-items: center; gap: 0.75rem; font-weight: 500; }
+    
+    .avatar { width: 36px; height: 36px; background: #E0E7FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+    /* Added Logout Button */
+    .logout {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      transition: color 0.2s;
+    }
+    .logout:hover {
+      color: #EF4444; /* Turns red on hover to indicate a destructive/exit action */
+    }
+
+    /* --- App Layout (Centered Feed) --- */
+    .app-container {
+      max-width: 680px; /* Constrains the width so it doesn't look stretched */
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* --- Main Feed --- */
+    .feed { display: flex; flex-direction: column; gap: 1.5rem; width: 100%; }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .author-info { display: flex; align-items: center; gap: 0.75rem; }
+    .author-name { font-weight: 700; font-size: 0.95rem; }
+    .post-date { font-size: 0.8rem; color: var(--text-muted); }
+
+    .card-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main); }
+    .card-desc { font-size: 0.95rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.6; }
+
+    /* The Learning / Idea Callout Box */
+    .learning-box {
+      background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+      border-left: 3px solid var(--accent-green);
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.25rem;
+    }
+    .learning-box h4 { font-size: 0.85rem; color: var(--accent-green); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem; }
+    .learning-box p { font-size: 0.9rem; font-style: italic; color: var(--text-main); }
+
+    /* Tags */
+    .meta-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; align-items: center; }
+    .tag { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; background: #F1F5F9; color: #334155; padding: 0.35rem 0.6rem; border-radius: 6px; border: 1px solid #E2E8F0; }
+    
+    .badge { font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 9999px; display: inline-flex; align-items: center; gap: 0.25rem; }
+    .badge.collab { background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); }
+
+    /* Actions */
+    .card-footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .action-group { display: flex; gap: 1.5rem; }
+    .btn-action {
+      background: none; border: none; font-family: var(--font-main); font-weight: 600; font-size: 0.9rem;
+      color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.35rem; transition: color 0.2s;
+    }
+    .btn-action:hover { color: var(--accent-blue); }
+    .btn-outline {
+      border: 1px solid var(--border-light); background: transparent; padding: 0.4rem 0.75rem; border-radius: 6px;
+      font-weight: 600; font-size: 0.85rem; color: var(--text-main); cursor: pointer;
+    }
+    .btn-outline:hover { background: #F8FAFC; border-color: #CBD5E1; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <h1>InternSync</h1>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-gradient">✨ Spark an Idea</button>
+      <div class="user-profile">
+        <div class="avatar">👨‍💻</div>
+        ayush8116-tech
+        <a href="#" class="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-container">
+    
+    <main class="feed">
+
+      <article class="card">
+        <div class="card-header">
+          <div class="author-info">
+            <div class="avatar" style="width:32px; height:32px; font-size:1rem;">👨‍💻</div>
+            <div>
+              <div class="author-name">ayush8116-tech</div>
+              <div class="post-date">May 30, 2026</div>
+            </div>
+          </div>
+        </div>
+        
+        <h2 class="card-title">yo</h2>
+        <p class="card-desc">for gemini</p>
+
+        <div class="card-footer">
+          <div class="action-group">
+            <button class="btn-action">👏 0 Applauds</button>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-outline">Edit</button>
+            <button class="btn-outline" style="color: #EF4444;">Delete</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <div class="author-info">
+            <div class="avatar" style="width:32px; height:32px; font-size:1rem;">👩‍🚀</div>
+            <div>
+              <div class="author-name">sarah-dev <span style="color: var(--text-muted); font-weight: 500;">shared a project</span></div>
+              <div class="post-date">2 hours ago</div>
+            </div>
+          </div>
+          <span class="badge collab">👥 Seeking Frontend Partner</span>
+        </div>
+        
+        <h2 class="card-title">Realtime Canvas (Figma Clone Lite)</h2>
+        <p class="card-desc">I've been playing around with WebSockets to create a collaborative whiteboard. The backend handles real-time cursor syncing, but I need help making the React frontend smooth and performant.</p>
+        
+        <div class="learning-box">
+          <h4>💡 What I learned so far</h4>
+          <p>"Handling state management for 10+ concurrent users is way harder than I thought. I had to ditch standard React Context and learn Zustand to prevent infinite re-renders!"</p>
+        </div>
+
+        <div class="meta-container">
+          <span class="tag">TypeScript</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">Zustand</span>
+        </div>
+
+        <div class="card-footer">
+          <div class="action-group">
+            <button class="btn-action">👏 24 Applauds</button>
+            <button class="btn-action">💬 5 Ideas</button>
+          </div>
+          <button class="btn-outline" style="border-color: var(--accent-purple); color: var(--accent-purple);">Connect & Collab</button>
+        </div>
+      </article>
+
+    </main>
+
+  </div>
+
+</body>
+</html>
